@@ -9,7 +9,8 @@ const Network = (() => {
     let localId = '';
     let localName = '';
     let localColorIndex = 0;
-    let playerRegistry = {}; // peerId -> { name, colorIndex }
+    let playerRegistry = {}; // gamePeerId -> { name, colorIndex, connId }
+    let connToGameId = {}; // conn.peer -> gamePeerId
     let onPlayerJoin = null;
     let onPlayerLeave = null;
     let onGameStart = null;
@@ -56,7 +57,8 @@ const Network = (() => {
                 // Add host to game
                 Game.addPlayer(localId, localName, localColorIndex);
                 Game.setLocalId(localId);
-                playerRegistry[localId] = { name: localName, colorIndex: localColorIndex };
+                playerRegistry[localId] = { name: localName, colorIndex: localColorIndex, connId: 'host' };
+                connToGameId['host'] = localId;
                 
                 if (onPlayerJoin) onPlayerJoin(localId, localName, localColorIndex);
                 resolve({ roomCode, peerId: localId });
@@ -166,16 +168,22 @@ const Network = (() => {
         });
 
         conn.on('close', () => {
-            const reg = playerRegistry[conn.peer];
+            const gameId = connToGameId[conn.peer];
+            if (!gameId) return;
+
+            const reg = playerRegistry[gameId];
             const playerName = reg ? reg.name : 'Player';
+            
             delete connections[conn.peer];
-            delete playerRegistry[conn.peer];
-            Game.removePlayer(conn.peer);
-            if (onPlayerLeave) onPlayerLeave(conn.peer, playerName);
+            delete playerRegistry[gameId];
+            delete connToGameId[conn.peer];
+            
+            Game.removePlayer(gameId);
+            if (onPlayerLeave) onPlayerLeave(gameId, playerName);
             if (onToast) onToast(playerName + ' left the game');
 
             // Notify all peers about the disconnect
-            broadcast({ type: 'player-left', peerId: conn.peer, name: playerName });
+            broadcast({ type: 'player-left', peerId: gameId, name: playerName });
         });
     }
 
@@ -184,25 +192,32 @@ const Network = (() => {
         switch (data.type) {
             case 'join': {
                 const ci = colorCounter++;
-                playerRegistry[fromPeerId] = { name: data.name, colorIndex: ci };
-                Game.addPlayer(fromPeerId, data.name, ci);
+                const actualId = data.peerId || fromPeerId; // Use explicit ID to avoid WebRTC mismatches
+                
+                playerRegistry[actualId] = { name: data.name, colorIndex: ci, connId: fromPeerId };
+                connToGameId[fromPeerId] = actualId;
+                
+                Game.addPlayer(actualId, data.name, ci);
 
-                if (onPlayerJoin) onPlayerJoin(fromPeerId, data.name, ci);
+                if (onPlayerJoin) onPlayerJoin(actualId, data.name, ci);
                 if (onToast) onToast(data.name + ' joined!');
 
                 // Send current player list to the new player
                 const playerList = {};
                 for (const pid of Object.keys(playerRegistry)) {
-                    playerList[pid] = playerRegistry[pid];
+                    playerList[pid] = { name: playerRegistry[pid].name, colorIndex: playerRegistry[pid].colorIndex };
                 }
                 connections[fromPeerId].send({ type: 'player-list', players: playerList, yourColor: ci });
 
                 // Notify other players
-                broadcast({ type: 'player-joined', peerId: fromPeerId, name: data.name, colorIndex: ci }, fromPeerId);
+                broadcast({ type: 'player-joined', peerId: actualId, name: data.name, colorIndex: ci }, fromPeerId);
                 break;
             }
             case 'input': {
-                Game.setInput(fromPeerId, data.input);
+                const gameId = connToGameId[fromPeerId];
+                if (gameId) {
+                    Game.setInput(gameId, data.input);
+                }
                 break;
             }
         }
@@ -321,6 +336,7 @@ const Network = (() => {
         }
         connections = {};
         playerRegistry = {};
+        connToGameId = {};
         isHost = false;
         roomCode = '';
         colorCounter = 0;
