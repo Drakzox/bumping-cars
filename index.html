@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bumping Cars — Online Multiplayer</title>
+    <meta name="description" content="A fast-paced online multiplayer bumping cars game. Play with friends in your browser — no downloads needed!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ============ MENU SCREEN ============ -->
+    <div id="menu-screen" class="screen active">
+        <div class="menu-bg"></div>
+        <div class="menu-container">
+            <h1 class="game-title">BUMPING<span class="accent">CARS</span></h1>
+            <p class="subtitle">Online Multiplayer Arena</p>
+
+            <div class="menu-card">
+                <div class="input-group">
+                    <label for="player-name-input">Your Name</label>
+                    <input type="text" id="player-name-input" placeholder="Enter your name..." maxlength="12" autocomplete="off">
+                </div>
+                <button id="create-room-btn" class="btn btn-primary">
+                    <span class="btn-icon">🏁</span> Create Room
+                </button>
+                <div class="divider"><span>OR</span></div>
+                <div class="input-group">
+                    <label for="room-code-input">Room Code</label>
+                    <input type="text" id="room-code-input" placeholder="Enter room code..." maxlength="8" autocomplete="off">
+                </div>
+                <button id="join-room-btn" class="btn btn-secondary">
+                    <span class="btn-icon">🚗</span> Join Room
+                </button>
+            </div>
+            <p class="footer-text">No downloads · Works on mobile & desktop</p>
+        </div>
+    </div>
+
+    <!-- ============ LOBBY SCREEN ============ -->
+    <div id="lobby-screen" class="screen">
+        <div class="menu-bg"></div>
+        <div class="menu-container">
+            <h1 class="game-title lobby-title">LOBBY</h1>
+
+            <div class="menu-card">
+                <div class="room-code-display">
+                    <span class="room-code-label">Room Code</span>
+                    <span id="room-code-value" class="room-code-value">----</span>
+                    <button id="copy-code-btn" class="btn-small">Copy</button>
+                </div>
+
+                <div class="players-list">
+                    <h3>Players <span id="player-count">(0/6)</span></h3>
+                    <ul id="players-ul"></ul>
+                </div>
+
+                <button id="start-game-btn" class="btn btn-primary" style="display:none;">
+                    <span class="btn-icon">▶</span> Start Game
+                </button>
+                <p id="waiting-text" class="waiting-text">Waiting for host to start...</p>
+            </div>
+
+            <button id="leave-lobby-btn" class="btn btn-ghost">← Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- ============ GAME SCREEN ============ -->
+    <div id="game-screen" class="screen">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div id="hud-room-code" class="hud-badge">Room: <span id="hud-code">----</span></div>
+            <div id="hud-score" class="hud-badge score-badge">Score: <span id="hud-score-value">0</span></div>
+        </div>
+
+        <!-- Scoreboard -->
+        <div id="scoreboard">
+            <h3>Leaderboard</h3>
+            <ol id="scoreboard-list"></ol>
+        </div>
+
+        <!-- Mobile Joystick -->
+        <div id="joystick-zone">
+            <div id="joystick-base">
+                <div id="joystick-thumb"></div>
+            </div>
+        </div>
+
+        <!-- Boost button for mobile -->
+        <div id="boost-btn-zone">
+            <button id="boost-btn" class="boost-button">🔥</button>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="game.js"></script>
+    <script src="network.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
