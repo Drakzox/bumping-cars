@@ -134,7 +134,10 @@ const UI = (() => {
             els.hudCode.textContent = result.roomCode;
             els.startGameBtn.style.display = 'none';
             els.waitingText.style.display = '';
-            showScreen('lobby');
+            // Only show lobby if the game start event hasn't already fired and shown the game screen
+            if (!screens.game.classList.contains('active')) {
+                showScreen('lobby');
+            }
         } catch (err) {
             showToast('Failed to join room: ' + err.message);
         }
@@ -306,6 +309,30 @@ const UI = (() => {
     els.playerNameInput.addEventListener('change', () => {
         localStorage.setItem('bumpcars-name', els.playerNameInput.value);
     });
+
+    // ===== CURSOR TRAILER =====
+    const trailer = document.getElementById('cursor-trailer');
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let trailerX = mouseX;
+    let trailerY = mouseY;
+
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function animateCursor() {
+        // Smoothly interpolate current trailer position towards actual mouse position
+        trailerX += (mouseX - trailerX) * 0.15;
+        trailerY += (mouseY - trailerY) * 0.15;
+        
+        if (trailer) {
+            trailer.style.transform = `translate(${trailerX - 15}px, ${trailerY - 15}px)`;
+        }
+        requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
 
     return { showScreen, showToast };
 })();

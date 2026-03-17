@@ -9,11 +9,11 @@ const Game = (() => {
     const CAR_H = 30;
     const CAR_RADIUS = 28; // collision radius
     const MAX_SPEED = 5;
-    const ACCEL = 0.18;
+    const ACCEL = 0.25;
     const BRAKE_DECEL = 0.12;
     const FRICTION = 0.97;
     const TURN_SPEED = 0.045;
-    const BOUNCE_FACTOR = 1.6; // Increased from 0.6 for more knockback
+    const BOUNCE_FACTOR = 3.5; // Huge knockback
     const WALL_BOUNCE = 0.5;
     const BUMP_COOLDOWN = 500; // ms between scoring same pair
     const BOOST_MULTIPLIER = 1.8;

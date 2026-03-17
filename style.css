@@ -469,6 +469,25 @@ html, body {
 @media (max-width: 500px) {
     .menu-container { padding: 14px; }
     .menu-card { padding: 20px 16px; }
-    #scoreboard { width: 150px; padding: 10px 12px; }
     #scoreboard-list li { font-size: .75rem; }
 }
+
+/* ===== CURSOR TRAILER ===== */
+#cursor-trailer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, opacity 0.2s;
+    mix-blend-mode: screen;
+    display: none; /* hidden on touch devices */
+}
+@media (hover: hover) and (pointer: fine) {
+    #cursor-trailer { display: block; }
+}
+
