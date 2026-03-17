@@ -16,6 +16,7 @@ const Network = (() => {
     let onGameStart = null;
     let onToast = null;
     let colorCounter = 0;
+    let gameStarted = false;
 
     const TICK_RATE = 50; // ms between state broadcasts (20 ticks/sec)
     let lastTickTime = 0;
@@ -209,6 +210,11 @@ const Network = (() => {
                 }
                 connections[fromPeerId].send({ type: 'player-list', players: playerList, yourColor: ci });
 
+                // If game already started, tell them to start immediately
+                if (gameStarted) {
+                    connections[fromPeerId].send({ type: 'start' });
+                }
+
                 // Notify other players
                 broadcast({ type: 'player-joined', peerId: actualId, name: data.name, colorIndex: ci }, fromPeerId);
                 break;
@@ -299,6 +305,7 @@ const Network = (() => {
     // ---- Host: start game ----
     function startGame() {
         if (!isHost) return;
+        gameStarted = true;
         broadcast({ type: 'start' });
         if (onGameStart) onGameStart(true);
     }
@@ -340,6 +347,7 @@ const Network = (() => {
         isHost = false;
         roomCode = '';
         colorCounter = 0;
+        gameStarted = false;
     }
 
     // ---- Public API ----

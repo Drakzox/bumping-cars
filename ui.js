@@ -237,7 +237,10 @@ const UI = (() => {
         }
     }, { passive: false });
 
-    document.addEventListener('touchend', (e) => {
+    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchcancel', handleTouchEnd);
+
+    function handleTouchEnd(e) {
         if (joystickTouchId === null) return;
         const touch = getTouch(e, joystickTouchId);
         if (touch) {
@@ -247,7 +250,7 @@ const UI = (() => {
             joystickInput = { up: false, down: false, left: false, right: false };
             sendCombinedInput();
         }
-    });
+    }
 
     function updateJoystick(tx, ty) {
         let dx = tx - joystickCenter.x;
