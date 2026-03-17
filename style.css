@@ -476,7 +476,7 @@ html, body {
 #cursor-trailer {
     position: fixed;
     top: 0; left: 0;
-    width: 200px; height: 200px;
+    width: 400px; height: 400px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
     opacity: 0.5;
@@ -484,7 +484,7 @@ html, body {
     z-index: 9999;
     transform: translate(-50%, -50%);
     mix-blend-mode: screen;
-    filter: blur(20px);
+    filter: blur(40px);
     display: none; /* hidden on touch devices */
 }
 @media (hover: hover) and (pointer: fine) {

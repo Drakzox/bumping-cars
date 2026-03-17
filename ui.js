@@ -328,7 +328,7 @@ const UI = (() => {
         trailerY += (mouseY - trailerY) * 0.15;
         
         if (trailer) {
-            trailer.style.transform = `translate(${trailerX - 100}px, ${trailerY - 100}px)`;
+            trailer.style.transform = `translate(${trailerX - 200}px, ${trailerY - 200}px)`;
         }
         requestAnimationFrame(animateCursor);
     }
