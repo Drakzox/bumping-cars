@@ -290,15 +290,11 @@ const Game = (() => {
                 addPlayer(id, s.name, s.colorIndex);
             }
             const c = players[id];
-            // Smooth interpolation for remote cars
-            if (id !== localId) {
-                c.x += (s.x - c.x) * 0.3;
-                c.y += (s.y - c.y) * 0.3;
-                c.angle += angleDiff(c.angle, s.angle) * 0.3;
-            } else {
-                // Still accept score from host
-                c.score = s.score;
-            }
+            // Smooth interpolation for all cars (we don't run local physics)
+            c.x += (s.x - c.x) * 0.3;
+            c.y += (s.y - c.y) * 0.3;
+            c.angle += angleDiff(c.angle, s.angle) * 0.3;
+            c.score = s.score;
             c.vx = s.vx;
             c.vy = s.vy;
             c.boosting = s.boosting;
