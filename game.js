@@ -74,6 +74,7 @@ const Game = (() => {
 
     // ---- Player management ----
     function addPlayer(id, name, colorIndex) {
+        if (players[id]) return players[id]; // prevent duplicates
         players[id] = createCar(id, name, colorIndex);
         return players[id];
     }

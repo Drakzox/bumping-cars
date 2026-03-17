@@ -85,6 +85,9 @@ const Network = (() => {
             onGameStart = callbacks.onGameStart;
             onToast = callbacks.onToast;
 
+            let settled = false;
+            let joinTimeout = null;
+
             peer = new Peer(undefined, {
                 debug: 0,
                 config: {
@@ -102,7 +105,21 @@ const Network = (() => {
                 const hostPeerId = 'bumpcars-' + roomCode;
                 const conn = peer.connect(hostPeerId, { reliable: true });
 
+                // Timeout: if connection doesn't open within 8 seconds, reject
+                joinTimeout = setTimeout(() => {
+                    if (!settled) {
+                        settled = true;
+                        conn.close();
+                        peer.destroy();
+                        peer = null;
+                        reject(new Error('Room not found or host is unreachable'));
+                    }
+                }, 8000);
+
                 conn.on('open', () => {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(joinTimeout);
                     connections[hostPeerId] = conn;
                     // Send join message
                     conn.send({ type: 'join', name: localName, peerId: localId });
@@ -119,13 +136,21 @@ const Network = (() => {
 
                 conn.on('error', (err) => {
                     console.error('Connection error:', err);
-                    reject(err);
+                    if (!settled) {
+                        settled = true;
+                        clearTimeout(joinTimeout);
+                        reject(err);
+                    }
                 });
             });
 
             peer.on('error', (err) => {
                 console.error('PeerJS error:', err);
-                reject(err);
+                if (!settled) {
+                    settled = true;
+                    if (joinTimeout) clearTimeout(joinTimeout);
+                    reject(err);
+                }
             });
         });
     }
@@ -188,13 +213,16 @@ const Network = (() => {
         switch (data.type) {
             case 'player-list': {
                 localColorIndex = data.yourColor;
+                // Add self to registry first (avoid duplicate from the list)
+                playerRegistry[localId] = { name: localName, colorIndex: localColorIndex };
                 for (const pid of Object.keys(data.players)) {
                     const p = data.players[pid];
+                    // Skip if we already registered this player (prevents duplicates)
+                    if (pid === localId) continue;
                     playerRegistry[pid] = p;
                     if (onPlayerJoin) onPlayerJoin(pid, p.name, p.colorIndex);
                 }
-                // Add self to registry
-                playerRegistry[localId] = { name: localName, colorIndex: localColorIndex };
+                // Fire join for self only once
                 if (onPlayerJoin) onPlayerJoin(localId, localName, localColorIndex);
                 break;
             }

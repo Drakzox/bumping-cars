@@ -53,6 +53,7 @@ const UI = (() => {
     let lobbyPlayers = {};
 
     function addLobbyPlayer(id, name, colorIndex) {
+        if (lobbyPlayers[id]) return; // prevent duplicate entries
         lobbyPlayers[id] = { name, colorIndex };
         refreshLobbyList();
     }
@@ -217,6 +218,9 @@ const UI = (() => {
         e.preventDefault();
         const touch = e.changedTouches[0];
         joystickTouchId = touch.identifier;
+        // Always recalculate center from the actual rendered position
+        // Force layout recalc to ensure correct values after screen transition
+        joystickBase.offsetHeight; // trigger reflow
         const rect = joystickBase.getBoundingClientRect();
         joystickCenter.x = rect.left + rect.width / 2;
         joystickCenter.y = rect.top + rect.height / 2;
