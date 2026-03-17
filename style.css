@@ -476,15 +476,15 @@ html, body {
 #cursor-trailer {
     position: fixed;
     top: 0; left: 0;
-    width: 30px; height: 30px;
+    width: 200px; height: 200px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
-    opacity: 0.6;
+    opacity: 0.5;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
-    transition: width 0.2s, height 0.2s, opacity 0.2s;
     mix-blend-mode: screen;
+    filter: blur(20px);
     display: none; /* hidden on touch devices */
 }
 @media (hover: hover) and (pointer: fine) {
