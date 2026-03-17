@@ -13,7 +13,7 @@ const Game = (() => {
     const BRAKE_DECEL = 0.12;
     const FRICTION = 0.97;
     const TURN_SPEED = 0.045;
-    const BOUNCE_FACTOR = 0.6;
+    const BOUNCE_FACTOR = 1.6; // Increased from 0.6 for more knockback
     const WALL_BOUNCE = 0.5;
     const BUMP_COOLDOWN = 500; // ms between scoring same pair
     const BOOST_MULTIPLIER = 1.8;
@@ -290,11 +290,16 @@ const Game = (() => {
                 addPlayer(id, s.name, s.colorIndex);
             }
             const c = players[id];
-            // Smooth interpolation for all cars (we don't run local physics)
-            c.x += (s.x - c.x) * 0.3;
-            c.y += (s.y - c.y) * 0.3;
-            c.angle += angleDiff(c.angle, s.angle) * 0.3;
+            // Interpolation and client-side prediction between ticks
+            // Local car lerps very fast, remote cars lerp smoothly
+            const lerp = (id === localId) ? 0.7 : 0.4;
+            c.x += (s.x - c.x) * lerp;
+            c.y += (s.y - c.y) * lerp;
+            c.angle += angleDiff(c.angle, s.angle) * lerp;
             c.score = s.score;
+            
+            // Apply host's velocity so the client can predict movement 
+            // between network ticks in the render loop
             c.vx = s.vx;
             c.vy = s.vy;
             c.boosting = s.boosting;
@@ -501,6 +506,15 @@ const Game = (() => {
             let scoreEvents = [];
             if (isHost) {
                 scoreEvents = updatePhysics(dt);
+            } else {
+                // Client-side smoothing: keep cars moving using their last known velocity
+                // Scaled roughly by the frame delta (16.6ms is one 60fps frame)
+                const frameScale = dt / 16.66;
+                for (const id of Object.keys(players)) {
+                    const c = players[id];
+                    c.x += c.vx * frameScale;
+                    c.y += c.vy * frameScale;
+                }
             }
 
             render();
