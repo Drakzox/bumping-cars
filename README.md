@@ -95,3 +95,7 @@ bumping-cars/
 - **Multiplayer**: PeerJS (WebRTC data channels)
 - **Hosting**: GitHub Pages (static files only)
 - **UI**: Vanilla CSS with glassmorphism + Google Fonts
+
+
+---
+*Created with DRKZX Aesthetics.*
